@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import User, Company
+from ..models import CareerPage, Company, User
 from ..schemas import (
     TokenResponse,
     UserCreate,
@@ -30,12 +30,14 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 @router.post(
     "/register",
-    response_model=UserResponse
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED
 )
 def register(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
+    # Prevent duplicate recruiter accounts.
     existing_user = (
         db.query(User)
         .filter(User.email == user_data.email)
@@ -48,18 +50,43 @@ def register(
             detail="Email already registered"
         )
 
-    company = (
+    # Company slugs must be unique because they are used
+    # in the public careers URL.
+    existing_company = (
         db.query(Company)
-        .order_by(Company.id.desc())
+        .filter(Company.slug == user_data.company_slug)
         .first()
     )
 
-    if not company:
+    if existing_company:
         raise HTTPException(
             status_code=400,
-            detail="Create a company before registering a recruiter"
+            detail="Company slug already exists"
         )
 
+    # Create the company for this recruiter.
+    company = Company(
+        name=user_data.company_name,
+        slug=user_data.company_slug
+    )
+
+    db.add(company)
+    db.flush()
+
+    # Every company gets a career page automatically.
+    career_page = CareerPage(
+        company_id=company.id,
+        headline=f"Careers at {company.name}",
+        description=f"Join {company.name} and build the future with us.",
+        primary_color="#172033",
+        secondary_color="#5267e8",
+        is_published=False
+    )
+
+    db.add(career_page)
+
+    # Create the recruiter and associate them
+    # with the company created above.
     user = User(
         email=user_data.email,
         password_hash=hash_password(user_data.password),
@@ -68,6 +95,7 @@ def register(
     )
 
     db.add(user)
+
     db.commit()
     db.refresh(user)
 

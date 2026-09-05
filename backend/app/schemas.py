@@ -1,4 +1,3 @@
-
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -28,6 +27,8 @@ class CompanyResponse(BaseModel):
 class UserCreate(BaseModel):
     email: str
     password: str
+    company_name: str
+    company_slug: str
 
 
 class UserResponse(BaseModel):
@@ -121,4 +122,3 @@ class PublicCareerPageResponse(BaseModel):
     career_page: CareerPageResponse
     sections: list[SectionResponse]
     jobs: list[JobResponse]
-
