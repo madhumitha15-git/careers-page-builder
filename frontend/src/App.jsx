@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Navigate,
@@ -8,6 +9,7 @@ import {
 import Dashboard from "./pages/Dashboard";
 import CareerBuilder from "./pages/CareerBuilder";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import PublicCareerPage from "./pages/PublicCareerPage";
 import Settings from "./pages/Settings";
 
@@ -15,8 +17,15 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Default page */}
+        <Route
+          path="/"
+          element={<Navigate to="/signup" replace />}
+        />
+
         {/* Authentication */}
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
         {/* Recruiter dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
@@ -41,7 +50,7 @@ function App() {
         {/* Fallback */}
         <Route
           path="*"
-          element={<Navigate to="/login" replace />}
+          element={<Navigate to="/signup" replace />}
         />
       </Routes>
     </BrowserRouter>

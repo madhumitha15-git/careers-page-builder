@@ -1,0 +1,11 @@
+title,description,location,job_type,department,is_open
+AI/ML Engineer,Build and deploy machine learning and AI-powered solutions.,"Hyderabad, India",Full-time,Engineering,true
+Backend Engineer,Design scalable APIs and backend services using Python and FastAPI.,"Hyderabad, India",Full-time,Engineering,true
+Frontend Engineer,Build accessible and responsive user experiences for our products.,"Bengaluru, India",Full-time,Engineering,true
+Data Scientist,Analyze data and develop predictive models to support business decisions.,"Remote, India",Full-time,Data,true
+Product Designer,Design intuitive product experiences and scalable design systems.,"Bengaluru, India",Full-time,Design,true
+DevOps Engineer,Build reliable deployment pipelines and cloud infrastructure.,"Hyderabad, India",Full-time,Infrastructure,true
+Software Engineering Intern,Work with engineers to build and improve production software.,"Hyderabad, India",Internship,Engineering,true
+Data Analyst Intern,Analyze datasets and create insights for product and business teams.,"Remote, India",Internship,Data,true
+HR Operations Specialist,Support recruiting operations and improve employee processes.,"Mumbai, India",Full-time,People,true
+Senior Backend Engineer,Lead development of scalable backend systems and APIs.,"Pune, India",Full-time,Engineering,false

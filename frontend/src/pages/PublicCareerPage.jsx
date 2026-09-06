@@ -7,10 +7,7 @@ import {
   Search,
   Video,
 } from "lucide-react";
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../api";
 
@@ -18,10 +15,7 @@ function PublicCareerPage() {
   const { companySlug } = useParams();
   const navigate = useNavigate();
 
-  const isPreview =
-    window.location.pathname.endsWith(
-      "/preview"
-    );
+  const isPreview = window.location.pathname.endsWith("/preview");
 
   const [data, setData] = useState(null);
 
@@ -42,15 +36,12 @@ function PublicCareerPage() {
           ? "/careers/my-page/preview"
           : `/public/${companySlug}`;
 
-        const response = await api.get(
-          endpoint
-        );
+        const response = await api.get(endpoint);
 
         setData(response.data);
 
         const companyName =
-          response.data.company?.name ||
-          "Careers";
+          response.data.company?.name || "Careers";
 
         const headline =
           response.data.career_page?.headline ||
@@ -64,23 +55,17 @@ function PublicCareerPage() {
           response.data.career_page?.description ||
           `Explore careers and open positions at ${companyName}.`;
 
-        let metaDescription =
-          document.querySelector(
-            'meta[name="description"]'
-          );
+        let metaDescription = document.querySelector(
+          'meta[name="description"]'
+        );
 
         if (!metaDescription) {
-          metaDescription =
-            document.createElement("meta");
-
+          metaDescription = document.createElement("meta");
           metaDescription.setAttribute(
             "name",
             "description"
           );
-
-          document.head.appendChild(
-            metaDescription
-          );
+          document.head.appendChild(metaDescription);
         }
 
         metaDescription.setAttribute(
@@ -89,25 +74,17 @@ function PublicCareerPage() {
         );
 
         if (!isPreview) {
-          let canonical =
-            document.querySelector(
-              'link[rel="canonical"]'
-            );
+          let canonical = document.querySelector(
+            'link[rel="canonical"]'
+          );
 
           if (!canonical) {
-            canonical =
-              document.createElement(
-                "link"
-              );
-
+            canonical = document.createElement("link");
             canonical.setAttribute(
               "rel",
               "canonical"
             );
-
-            document.head.appendChild(
-              canonical
-            );
+            document.head.appendChild(canonical);
           }
 
           canonical.setAttribute(
@@ -116,20 +93,13 @@ function PublicCareerPage() {
           );
         }
       } catch (err) {
-        if (
-          err.response?.status === 401
-        ) {
-          localStorage.removeItem(
-            "access_token"
-          );
-
+        if (err.response?.status === 401) {
+          localStorage.removeItem("access_token");
           navigate("/login");
           return;
         }
 
-        if (
-          err.response?.status === 404
-        ) {
+        if (err.response?.status === 404) {
           setError(
             isPreview
               ? "Preview is unavailable. Make sure your career page exists."
@@ -146,33 +116,38 @@ function PublicCareerPage() {
     };
 
     loadCareerPage();
-  }, [
-    companySlug,
-    isPreview,
-    navigate,
-  ]);
+  }, [companySlug, isPreview, navigate]);
 
   const jobs = data?.jobs || [];
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
+      const normalizedSearch =
+        search.trim().toLowerCase();
+
+      const normalizedLocation =
+        location.trim().toLowerCase();
+
+      const normalizedJobType =
+        jobType.trim().toLowerCase();
+
       const matchesSearch =
-        !search ||
-        job.title
-          .toLowerCase()
-          .includes(search.toLowerCase());
+        !normalizedSearch ||
+        job.title?.toLowerCase().includes(
+          normalizedSearch
+        );
 
       const matchesLocation =
-        !location ||
-        job.location
-          .toLowerCase()
-          .includes(location.toLowerCase());
+        !normalizedLocation ||
+        job.location?.toLowerCase().includes(
+          normalizedLocation
+        );
 
       const matchesJobType =
-        !jobType ||
-        job.job_type
-          .toLowerCase()
-          .includes(jobType.toLowerCase());
+        !normalizedJobType ||
+        job.job_type?.toLowerCase().includes(
+          normalizedJobType
+        );
 
       return (
         matchesSearch &&
@@ -207,25 +182,13 @@ function PublicCareerPage() {
     ];
   }, [jobs]);
 
-  /*
-   * SEO structured data
-   *
-   * Public pages expose:
-   * 1. Organization schema
-   * 2. JobPosting schema for every open position
-   *
-   * Preview pages intentionally do not add
-   * structured data because preview content
-   * should not be treated as public content.
-   */
   useEffect(() => {
     if (!data || isPreview) {
       return;
     }
 
     const company = data.company;
-    const careerPage =
-      data.career_page;
+    const careerPage = data.career_page;
 
     const existingOrganizationScript =
       document.querySelector(
@@ -237,14 +200,12 @@ function PublicCareerPage() {
     }
 
     const organizationData = {
-      "@context":
-        "https://schema.org",
+      "@context": "https://schema.org",
       "@type": "Organization",
       name: company.name,
       url: window.location.href,
       description:
-        careerPage.description ||
-        undefined,
+        careerPage.description || undefined,
     };
 
     if (company.logo_url) {
@@ -253,9 +214,7 @@ function PublicCareerPage() {
     }
 
     const organizationScript =
-      document.createElement(
-        "script"
-      );
+      document.createElement("script");
 
     organizationScript.id =
       "career-page-structured-data";
@@ -264,17 +223,12 @@ function PublicCareerPage() {
       "application/ld+json";
 
     organizationScript.textContent =
-      JSON.stringify(
-        organizationData
-      );
+      JSON.stringify(organizationData);
 
     document.head.appendChild(
       organizationScript
     );
 
-    /*
-     * JobPosting structured data
-     */
     const existingJobScripts =
       document.querySelectorAll(
         ".job-posting-structured-data"
@@ -287,8 +241,7 @@ function PublicCareerPage() {
     const jobPostingScripts =
       jobs.map((job) => {
         const jobData = {
-          "@context":
-            "https://schema.org",
+          "@context": "https://schema.org",
           "@type": "JobPosting",
 
           title: job.title,
@@ -297,23 +250,18 @@ function PublicCareerPage() {
             job.description ||
             `${job.title} opportunity at ${company.name}.`,
 
-          datePosted:
-            job.created_at
-              ? new Date(
-                  job.created_at
-                )
-                  .toISOString()
-                  .split("T")[0]
-              : new Date()
-                  .toISOString()
-                  .split("T")[0],
+          datePosted: job.created_at
+            ? new Date(job.created_at)
+                .toISOString()
+                .split("T")[0]
+            : new Date()
+                .toISOString()
+                .split("T")[0],
 
-          employmentType:
-            job.job_type,
+          employmentType: job.job_type,
 
           hiringOrganization: {
-            "@type":
-              "Organization",
+            "@type": "Organization",
             name: company.name,
             sameAs:
               window.location.origin +
@@ -321,13 +269,11 @@ function PublicCareerPage() {
           },
 
           jobLocation: {
-            "@type":
-              "Place",
+            "@type": "Place",
+
             address: {
-              "@type":
-                "PostalAddress",
-              addressLocality:
-                job.location,
+              "@type": "PostalAddress",
+              addressLocality: job.location,
             },
           },
 
@@ -337,9 +283,7 @@ function PublicCareerPage() {
         };
 
         const script =
-          document.createElement(
-            "script"
-          );
+          document.createElement("script");
 
         script.className =
           "job-posting-structured-data";
@@ -350,9 +294,7 @@ function PublicCareerPage() {
         script.textContent =
           JSON.stringify(jobData);
 
-        document.head.appendChild(
-          script
-        );
+        document.head.appendChild(script);
 
         return script;
       });
@@ -410,33 +352,52 @@ function PublicCareerPage() {
 
   const {
     company,
-    career_page,
+    career_page: careerPage,
     sections,
   } = data;
+
+  /*
+   * Keep the hero description short.
+   * The full company description belongs in Our Story.
+   */
+  const heroDescription =
+    `Discover opportunities to build meaningful technology with ${company.name}.`;
+
+  /*
+   * Only show recruiter-created sections here.
+   * The built-in Story section is handled separately below.
+   */
+  const visibleSections = sections
+    .filter((section) => section.is_visible)
+    .sort(
+      (first, second) =>
+        first.display_order -
+        second.display_order
+    );
 
   return (
     <main
       className="public-careers-page"
       style={{
         "--public-primary":
-          career_page.primary_color ||
+          careerPage.primary_color ||
           "#172033",
 
         "--public-secondary":
-          career_page.secondary_color ||
+          careerPage.secondary_color ||
           "#5267e8",
       }}
     >
       {isPreview && (
         <div className="preview-mode-bar">
           <button
+            type="button"
             onClick={() =>
               navigate("/builder")
             }
             aria-label="Back to career builder"
           >
             <ArrowLeft size={16} />
-
             Back to builder
           </button>
 
@@ -446,20 +407,24 @@ function PublicCareerPage() {
         </div>
       )}
 
+      {/* =====================================================
+          HERO
+      ===================================================== */}
+
       <section
         className="public-hero"
         style={{
           backgroundColor:
-            career_page.primary_color ||
+            careerPage.primary_color ||
             "#172033",
 
           backgroundImage:
-            career_page.banner_url
+            careerPage.banner_url
               ? `linear-gradient(
                   rgba(0, 0, 0, 0.48),
                   rgba(0, 0, 0, 0.48)
                 ),
-                url(${career_page.banner_url})`
+                url(${careerPage.banner_url})`
               : "none",
         }}
       >
@@ -488,69 +453,75 @@ function PublicCareerPage() {
           </p>
 
           <h1>
-            {career_page.headline ||
-              "Build the future with us"}
+            {careerPage.headline ||
+              `Careers at ${company.name}`}
           </h1>
 
-          {career_page.description && (
-            <p className="public-hero-description">
-              {career_page.description}
-            </p>
-          )}
+          <p className="public-hero-description">
+            {heroDescription}
+          </p>
         </div>
       </section>
 
       <div className="public-content">
-        <section className="public-story">
-          <div className="public-section-label">
+
+        {/* ===================================================
             OUR STORY
+        =================================================== */}
+
+        <section className="public-story">
+          <div className="public-story-content">
+            <div className="public-section-label">
+              OUR STORY
+            </div>
+
+            <h2>
+              Building technology that
+              moves teams forward.
+            </h2>
+
+            <p>
+              {careerPage.description ||
+                `${company.name} is building thoughtful technology that helps teams solve complex problems, move faster, and focus on what matters.`}
+            </p>
           </div>
-
-          <h2>
-            We are building something meaningful.
-          </h2>
-
-          <p>
-            {career_page.description ||
-              "Learn more about our company, our culture, and the people building the future with us."}
-          </p>
         </section>
 
-        {sections
-          .filter(
-            (section) =>
-              section.is_visible
-          )
-          .map((section) => (
-            <section
-              className="public-content-section"
-              key={section.id}
-            >
-              <div className="public-section-label">
-                {section.section_type ===
-                "custom"
-                  ? "ABOUT US"
-                  : section.section_type
-                      .replace(
-                        /_/g,
-                        " "
-                      )
-                      .toUpperCase()}
-              </div>
+        {/* ===================================================
+            RECRUITER-CREATED SECTIONS
+        =================================================== */}
 
-              <h2>
-                {section.title ||
-                  "Our company"}
-              </h2>
+        {visibleSections.map((section) => (
+          <section
+            className="public-content-section"
+            key={section.id}
+          >
+            <div className="public-section-label">
+              {section.section_type === "custom"
+                ? "ABOUT"
+                : section.section_type
+                    .replace(/_/g, " ")
+                    .toUpperCase()}
+            </div>
 
+            <h2>
+              {section.title ||
+                "Our company"}
+            </h2>
+
+            {section.content && (
               <p>
-                {section.content ||
-                  "Discover what makes our company a great place to work."}
+                {section.content}
               </p>
-            </section>
-          ))}
+            )}
+          </section>
+        ))}
 
-        {career_page.culture_video_url && (
+        {/* ===================================================
+            CULTURE VIDEO
+        =================================================== */}
+
+        {careerPage.culture_video_url && (
           <section className="public-video-section">
             <div className="public-section-label">
               LIFE AT{" "}
@@ -563,7 +534,7 @@ function PublicCareerPage() {
 
             <a
               href={
-                career_page.culture_video_url
+                careerPage.culture_video_url
               }
               target="_blank"
               rel="noopener noreferrer"
@@ -587,6 +558,10 @@ function PublicCareerPage() {
           </section>
         )}
 
+        {/* ===================================================
+            OPEN POSITIONS
+        =================================================== */}
+
         <section className="public-jobs-section">
           <div className="public-jobs-heading">
             <div>
@@ -606,8 +581,7 @@ function PublicCareerPage() {
 
             <span className="public-job-count">
               {filteredJobs.length}{" "}
-              {filteredJobs.length ===
-              1
+              {filteredJobs.length === 1
                 ? "role"
                 : "roles"}
             </span>
@@ -643,16 +617,14 @@ function PublicCareerPage() {
                 All locations
               </option>
 
-              {locations.map(
-                (item) => (
-                  <option
-                    value={item}
-                    key={item}
-                  >
-                    {item}
-                  </option>
-                )
-              )}
+              {locations.map((item) => (
+                <option
+                  value={item}
+                  key={item}
+                >
+                  {item}
+                </option>
+              ))}
             </select>
 
             <select
@@ -668,25 +640,20 @@ function PublicCareerPage() {
                 All job types
               </option>
 
-              {jobTypes.map(
-                (item) => (
-                  <option
-                    value={item}
-                    key={item}
-                  >
-                    {item}
-                  </option>
-                )
-              )}
+              {jobTypes.map((item) => (
+                <option
+                  value={item}
+                  key={item}
+                >
+                  {item}
+                </option>
+              ))}
             </select>
           </div>
 
-          {filteredJobs.length ===
-          0 ? (
+          {filteredJobs.length === 0 ? (
             <div className="public-empty-jobs">
-              <BriefcaseBusiness
-                size={28}
-              />
+              <BriefcaseBusiness size={28} />
 
               <h3>
                 No positions found
@@ -699,53 +666,48 @@ function PublicCareerPage() {
             </div>
           ) : (
             <div className="public-job-list">
-              {filteredJobs.map(
-                (job) => (
-                  <article
-                    className="public-job-card"
-                    id={`job-${job.id}`}
-                    key={job.id}
-                  >
-                    <div className="public-job-icon">
-                      <BriefcaseBusiness
-                        size={19}
-                      />
-                    </div>
+              {filteredJobs.map((job) => (
+                <article
+                  className="public-job-card"
+                  id={`job-${job.id}`}
+                  key={job.id}
+                >
+                  <div className="public-job-icon">
+                    <BriefcaseBusiness
+                      size={19}
+                    />
+                  </div>
 
-                    <div className="public-job-main">
-                      <h3>
-                        {job.title}
-                      </h3>
+                  <div className="public-job-main">
+                    <h3>
+                      {job.title}
+                    </h3>
 
-                      <div className="public-job-meta">
+                    <div className="public-job-meta">
+                      <span>
+                        <MapPin size={14} />
+                        {job.location}
+                      </span>
+
+                      <span>
+                        {job.job_type}
+                      </span>
+
+                      {job.department && (
                         <span>
-                          <MapPin
-                            size={14}
-                          />
-
-                          {job.location}
+                          {job.department}
                         </span>
-
-                        <span>
-                          {job.job_type}
-                        </span>
-
-                        {job.department && (
-                          <span>
-                            {job.department}
-                          </span>
-                        )}
-                      </div>
-
-                      {job.description && (
-                        <p>
-                          {job.description}
-                        </p>
                       )}
                     </div>
-                  </article>
-                )
-              )}
+
+                    {job.description && (
+                      <p>
+                        {job.description}
+                      </p>
+                    )}
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </section>
